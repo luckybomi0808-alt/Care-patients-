@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CARE SHIFT | 간호 시뮬레이션</title>
+<style>
+:root{--navy:#17324d;--teal:#247f83;--mint:#e7f5f2;--paper:#f5f8fb;--ink:#203347;--muted:#637589;--line:#dce6ed;--white:#fff;--gold:#f2c66d}
+*{box-sizing:border-box} body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}
+header{background:linear-gradient(120deg,#17324d,#247f83);color:white;padding:28px 18px 32px}
+.wrap{max-width:850px;margin:auto;padding:0 16px}.eyebrow{font-size:.78rem;letter-spacing:.16em;font-weight:800;opacity:.85}
+h1{font-size:clamp(2rem,7vw,3rem);line-height:1.1;margin:8px 0}.subtitle{max-width:600px;color:#e4f4f3;margin:10px 0 0}
+main{padding:22px 0 40px}.topline{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.pill{border-radius:99px;padding:5px 11px;background:var(--mint);color:#176568;font-weight:750;font-size:.82rem}
+.panel{background:white;border:1px solid var(--line);border-radius:20px;padding:clamp(18px,4vw,28px);box-shadow:0 8px 26px #19364b0b;margin-bottom:16px}
+h2{font-size:1.35rem;margin:0 0 8px;color:var(--navy)} h3{margin:0 0 6px;font-size:1rem}
+.muted{color:var(--muted)}.patient{display:flex;gap:15px;align-items:flex-start}
+.avatar{width:58px;height:58px;flex:0 0 58px;display:grid;place-items:center;border-radius:18px;background:#e6f3f4;font-size:1.8rem}
+.info{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.info div{background:#f6f9fb;border-radius:12px;padding:10px;font-size:.9rem}.info b{display:block;font-size:.75rem;color:var(--muted);margin-bottom:2px}
+.question{font-weight:800;font-size:1.05rem;margin:20px 0 12px}
+.choices{display:grid;gap:10px}
+.choice{border:1.5px solid var(--line);border-radius:14px;padding:13px 15px;text-align:left;background:white;color:var(--ink);font:inherit;cursor:pointer;transition:.15s}
+.choice:hover{border-color:var(--teal);background:#f3fbfa}.choice:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.choice:disabled{cursor:default;opacity:.75}.choice strong{display:block}.choice span{font-size:.9rem;color:var(--muted)}
+.feedback{margin-top:16px;padding:15px;border-radius:14px;background:#edf7f5;border-left:4px solid var(--teal)}.feedback.bad{background:#fff5e8;border-color:#d99a39}
+button.primary{border:0;background:var(--navy);color:white;font:inherit;font-weight:750;padding:12px 18px;border-radius:12px;cursor:pointer}
+button.primary:hover{background:#24506e}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.progress{height:8px;background:#e2ebef;border-radius:20px;overflow:hidden;flex:1;min-width:100px}.bar{height:100%;background:var(--teal);width:0;transition:width .25s}
+.scoregrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:16px 0}.score{background:#f4f8fa;border-radius:14px;padding:13px;text-align:center}.score b{display:block;font-size:1.45rem;color:var(--teal)}
+.note{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin-top:18px}
+.hidden{display:none!important}.center{text-align:center}.bigicon{font-size:2.8rem}.result-title{font-size:1.8rem;font-weight:850;color:var(--navy)}
+footer{padding:0 16px 28px;text-align:center;color:var(--muted);font-size:.8rem}
+@media(max-width:520px){.info{grid-template-columns:1fr}.patient{gap:10px}.avatar{width:48px;height:48px;flex-basis:48px}.scoregrid{grid-template-columns:1fr 1fr}.score:last-child{grid-column:span 2}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="eyebrow">NURSING CARE • INTERACTIVE LEARNING</div>
+  <h1>CARE SHIFT</h1>
+  <div style="font-size:1.12rem;font-weight:700">간호 시뮬레이션: 관찰하고, 소통하고, 안전하게</div>
+  <p class="subtitle">가상의 환자 상황에서 간호사의 핵심 역량인 관찰·의사소통·환자 안전을 연습해 보세요.</p>
+</div></header>
+<main class="wrap">
+  <div class="topline"><span class="pill" id="stagePill">CASE 01 · 병동 상황</span><span class="muted" id="stepText">1 / 4 단계</span></div>
+  <div class="row" style="margin:0 0 14px"><div class="progress"><div class="bar" id="progressBar"></div></div><span class="muted" id="scoreLabel">CARE 점수 0</span></div>
+  <section class="panel" id="gamePanel">
+    <div class="patient">
+      <div class="avatar" aria-hidden="true">🧑‍🦳</div>
+      <div><h2 id="caseTitle">환자에게 무슨 일이 있을까요?</h2><p class="muted" id="caseIntro">당신은 간호팀 실습생입니다. 환자의 안전을 가장 먼저 생각해 보세요.</p></div>
+    </div>
+    <div class="info" id="patientInfo">
+      <div><b>환자</b>박OO · 68세</div><div><b>현재 상황</b>침대에서 일어나려다 어지럽다고 말함</div><div><b>목표</b>안전 확인과 적절한 보고</div>
+    </div>
+    <div class="question" id="question">첫 번째로 어떤 행동을 하는 것이 가장 적절할까요?</div>
+    <div class="choices" id="choices"></div>
+    <div id="feedback" class="feedback hidden" aria-live="polite"></div>
+    <div class="row"><button class="primary hidden" id="nextBtn">다음 단계 →</button><span class="muted" id="hint">정답을 맞히는 것보다 이유를 이해하는 것이 중요해요.</span></div>
+  </section>
+  <section class="panel hidden" id="resultPanel">
+    <div class="center"><div class="bigicon">🩺</div><div class="result-title">케이스 완료!</div><p class="muted">간호에서 중요한 것은 혼자 모든 것을 해결하는 것이 아니라, 환자를 관찰하고 안전하게 소통하는 것입니다.</p></div>
+    <div class="scoregrid"><div class="score"><b id="finalScore">0</b><span>CARE 점수</span></div><div class="score"><b id="safeCount">0/4</b><span>안전한 선택</span></div><div class="score"><b id="level">탐구 중</b><span>학습 단계</span></div></div>
+    <h3>이번 케이스에서 배운 점</h3>
+    <ul><li>환자의 말을 주의 깊게 듣고 현재 상태를 관찰하기</li><li>낙상 등 위험을 예방하고 환자 안전을 우선하기</li><li>상태 변화나 우려 사항은 담당 간호사·의료진에게 신속히 알리기</li><li>환자에게 행동을 설명하고 존중하는 태도로 소통하기</li></ul>
+    <div class="feedback"><b>진로 탐구 질문</b><br>간호사는 환자 곁에서 어떤 정보를 관찰하고, 다른 의료진에게 어떻게 전달할까요? 이 질문을 중심으로 간호사의 역할을 더 조사해 보세요.</div>
+    <div class="row"><button class="primary" id="restartBtn">처음부터 다시 하기 ↻</button></div>
+  </section>
+  <p class="note">교육용 가상 사례입니다. 실제 환자에게 적용할 의료 지침이 아니며, 실제 응급상황에서는 현지 응급번호 및 의료진의 지시를 따르세요. 본 게임의 사례는 간호사의 역할을 이해하기 위한 학습용으로 제작되었습니다.</p>
+</main>
+<footer>CARE SHIFT · 학생 진로 탐구 프로젝트</footer>
+<script>
+const steps = [
+ {title:"환자가 어지럽다고 말해요",intro:"박OO님이 침대에서 일어나려다 “갑자기 어지러워요”라고 말합니다.",question:"가장 먼저 할 행동은 무엇일까요?",choices:[
+  {t:"환자가 혼자 걸을 수 있는지 바로 걸어 보게 한다",d:"상태를 확인하기 위해 걷게 하는 것은 넘어질 위험을 높일 수 있어요.",good:false,why:"어지럼을 호소하는 환자에게 무리하게 움직이도록 하지 않고, 낙상 위험을 먼저 줄여야 합니다."},
+  {t:"움직임을 멈추도록 돕고 곁에서 안전을 확보한 뒤 담당 간호사에게 알린다",d:"환자 안전을 우선하고 도움을 요청하는 선택이에요.",good:true,why:"갑작스러운 어지럼은 원인을 단정할 수 없어요. 환자가 넘어지지 않도록 안전을 확보하고 담당 간호사에게 즉시 알리는 것이 중요합니다."},
+  {t:"물을 마시게 한 뒤 증상이 사라질 때까지 혼자 둔다",d:"원인을 모른 채 혼자 두면 상태 변화나 낙상 위험을 놓칠 수 있어요.",good:false,why:"임의로 해결하려 하기보다 환자의 안전을 확보하고 담당 간호사에게 알려 평가를 받도록 해야 합니다."}
+ ]},
+ {title:"환자의 상태를 확인해요",intro:"환자는 앉은 상태에서 여전히 어지럽다고 말합니다. 당신은 실습생이며 독자적으로 진단하거나 처치할 권한이 없습니다.",question:"정보를 확인하는 가장 적절한 방법은 무엇일까요?",choices:[
+  {t:"환자에게 언제부터 어떤 느낌이 들었는지 차분히 묻고, 관찰한 내용을 담당 간호사에게 전달한다",d:"환자의 말을 듣고 사실에 근거해 전달하는 방법이에요.",good:true,why:"증상 시작 시점과 환자의 표현 등 관찰 가능한 정보를 확인해 전달하면 의료진이 상태를 평가하는 데 도움이 됩니다. 자신의 역할 범위를 지키는 것도 중요해요."},
+  {t:"원인을 스스로 판단하고 진단명을 알려 준다",d:"실습생이 근거 없이 진단을 내리거나 확정적으로 설명해서는 안 돼요.",good:false,why:"증상의 원인은 여러 가지일 수 있습니다. 추측으로 진단하지 말고 환자의 말을 기록·전달해 담당 의료진의 평가를 받도록 합니다."},
+  {t:"환자가 괜찮다고 할 때까지 아무것도 묻지 않는다",d:"환자의 말을 존중하되, 현재 상태에 대한 확인과 보고도 필요해요.",good:false,why:"환자의 주관적인 느낌을 듣고 필요한 정보를 확인하는 것은 간호에서 중요한 관찰과 의사소통의 일부입니다."}
+ ]},
+ {title:"상태 변화가 걱정돼요",intro:"환자가 “평소와 다르게 몸이 너무 이상해요”라고 말하며 불안해합니다.",question:"간호사의 태도로 가장 적절한 것은 무엇일까요?",choices:[
+  {t:"“별일 아닐 거예요”라고 말하고 대화를 끝낸다",d:"근거 없이 괜찮다고 단정하면 환자의 걱정과 증상을 놓칠 수 있어요.",good:false,why:"환자의 걱정을 가볍게 여기거나 결과를 단정하지 말고, 말을 경청한 뒤 담당 간호사에게 알립니다."},
+  {t:"환자의 말을 끊고 필요한 일만 빠르게 처리한다",d:"효율도 중요하지만 존중하는 의사소통이 필요해요.",good:false,why:"환자의 말을 경청하고 이해하기 쉬운 말로 설명하는 태도는 신뢰와 안전한 간호에 중요합니다."},
+  {t:"걱정을 인정하고 곁에 있겠다고 설명한 뒤, 상태 변화가 있음을 담당 간호사에게 즉시 알린다",d:"공감과 적절한 보고를 함께 실천한 선택이에요.",good:true,why:"환자에게 공감하며 차분히 설명하고, 상태 변화나 우려를 의료진에게 전달해야 합니다. 혼자 판단해 넘기지 않는 것이 중요합니다."}
+ ]},
+ {title:"팀에게 상황을 전달해요",intro:"담당 간호사에게 보고할 차례입니다. 전달 내용은 명확하고 사실에 근거해야 합니다.",question:"어떤 보고가 가장 도움이 될까요?",choices:[
+  {t:"“환자가 좀 이상해요. 와 주세요.”라고만 말한다",d:"도움 요청은 있지만 어떤 변화가 있었는지 정보가 부족해요.",good:false,why:"환자의 증상, 시작 시점, 관찰한 변화, 이미 취한 안전 조치를 구체적이고 간결하게 전달하는 것이 좋습니다."},
+  {t:"환자가 말한 증상, 시작 시점, 관찰한 변화와 취한 조치를 사실대로 간결하게 전달한다",d:"객관적인 정보와 조치를 명확히 전달했어요.",good:true,why:"정확한 인계와 보고는 팀 의료에서 환자 안전을 높입니다. 추측을 사실처럼 말하지 말고, 모르는 내용은 모른다고 구분합니다."},
+  {t:"환자의 상태가 나아졌다고 추측해서 보고한다",d:"확인하지 않은 정보를 사실처럼 전달하면 위험할 수 있어요.",good:false,why:"보고할 때는 직접 관찰한 사실과 환자가 말한 내용을 구분해야 합니다. 확인되지 않은 상태를 임의로 판단하지 않습니다."}
+ ]}
+];
+let index=0, score=0, safe=0, answered=false;
+const $=id=>document.getElementById(id);
+function render(){
+ const s=steps[index]; answered=false;
+ $("stagePill").textContent=`CASE 01 · ${index<2?"관찰과 안전":index===2?"환자 소통":"팀 의사소통"}`;
+ $("stepText").textContent=`${index+1} / ${steps.length} 단계`;
+ $("progressBar").style.width=`${index/steps.length*100}%`;
+ $("scoreLabel").textContent=`CARE 점수 ${score}`;
+ $("caseTitle").textContent=s.title;$("caseIntro").textContent=s.intro;$("question").textContent=s.question;
+ $("feedback").classList.add("hidden");$("nextBtn").classList.add("hidden");$("hint").classList.remove("hidden");
+ $("choices").innerHTML="";
+ s.choices.forEach((c,i)=>{
+  const b=document.createElement("button");b.className="choice";
+  b.innerHTML=`<strong>${String.fromCharCode(65+i)}. ${c.t}</strong><span>${c.d}</span>`;
+  b.addEventListener("click",()=>choose(i));$("choices").appendChild(b);
+ });
+}
+function choose(i){
+ if(answered)return;answered=true;const s=steps[index],c=s.choices[i];
+ if(c.good){score+=25;safe++;}
+ [...$("choices").children].forEach((b,j)=>{b.disabled=true;if(j===i)b.style.borderColor=c.good?"#247f83":"#d99a39";});
+ const f=$("feedback");f.classList.remove("hidden","bad");if(!c.good)f.classList.add("bad");
+ f.innerHTML=`<b>${c.good?"좋은 판단이에요!":"다시 생각해 볼 부분이 있어요."}</b><br>${c.why}`;
+ $("scoreLabel").textContent=`CARE 점수 ${score}`;$("hint").classList.add("hidden");
+ $("nextBtn").textContent=index===steps.length-1?"결과 확인하기 →":"다음 단계 →";$("nextBtn").classList.remove("hidden");
+ $("progressBar").style.width=`${(index+1)/steps.length*100}%`;
+}
+$("nextBtn").addEventListener("click",()=>{if(index<steps.length-1){index++;render()}else finish()});
+function finish(){
+ $("gamePanel").classList.add("hidden");$("resultPanel").classList.remove("hidden");
+ $("finalScore").textContent=score;$("safeCount").textContent=`${safe}/4`;
+ $("level").textContent=score>=75?"안전 우선":score>=50?"성장 중":"계속 연습";
+ $("progressBar").style.width="100%";$("stepText").textContent="완료";
+}
+function restart(){index=0;score=0;safe=0;$("resultPanel").classList.add("hidden");$("gamePanel").classList.remove("hidden");render()}
+$("restartBtn").addEventListener("click",restart);render();
+</script>
+</body>
+</html>
